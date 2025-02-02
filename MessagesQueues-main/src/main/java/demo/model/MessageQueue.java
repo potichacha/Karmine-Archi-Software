@@ -1,16 +1,25 @@
-package demo.model;
+package com.example.karmine.model;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
+@Entity
 public class MessageQueue {
-    private String id;
-    private java.util.Queue<Message> messages;
 
-    public MessageQueue() {
-        this.messages = new ConcurrentLinkedQueue<>();
+    @Id
+    private String id; // Identifiant unique de la file d'attente
+
+    @OneToMany(mappedBy = "queue", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
+
+    public MessageQueue() {}
+
+    public MessageQueue(String id) {
+        this.id = id;
     }
 
+    // Getters et setters
     public String getId() {
         return id;
     }
@@ -19,19 +28,25 @@ public class MessageQueue {
         this.id = id;
     }
 
-    public Queue<Message> getMessages() {
+    public List<Message> getMessages() {
         return messages;
     }
 
-    public void setMessages(Queue<Message> messages) {
-        this.messages = messages;
-    }
-
     public void addMessage(Message message) {
+        message.setQueue(this);
         this.messages.add(message);
     }
 
-    public Message nextMessage() {
-        return this.messages.poll();
+    public void removeMessage(Message message) {
+        this.messages.remove(message);
+        message.setQueue(null);
+    }
+
+    @Override
+    public String toString() {
+        return "MessageQueue{" +
+                "id='" + id + '\'' +
+                ", messages=" + messages.size() +
+                '}';
     }
 }
