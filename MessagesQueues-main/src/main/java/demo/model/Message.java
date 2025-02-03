@@ -1,9 +1,13 @@
 package demo.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Message {
 
     @Id
@@ -15,6 +19,7 @@ public class Message {
     private LocalDateTime createdAt;
 
     private LocalDateTime availableAt; // Quand ce message devient disponible
+    private boolean isRead = false;
 
     @ManyToOne
     private MessageQueue queue; // Relation avec la file d’attente
@@ -26,6 +31,9 @@ public class Message {
         this.createdAt = LocalDateTime.now();
         this.availableAt = this.createdAt.plusSeconds(delayInSeconds);
     }
+
+    @ManyToMany(mappedBy = "messages", cascade = CascadeType.ALL)
+    private List<Topic> topics;
 
     // Getters et setters
     public Long getId() {
@@ -58,6 +66,18 @@ public class Message {
 
     public void setQueue(MessageQueue queue) {
         this.queue = queue;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void removeMessage(Message message) {
+        if (!message.isRead()) {
+            throw new IllegalStateException("Message not read, cannot del");
+        }
+        this.messages ?.remove(message);
+        message.setQueue(null);
     }
 
     @Override
