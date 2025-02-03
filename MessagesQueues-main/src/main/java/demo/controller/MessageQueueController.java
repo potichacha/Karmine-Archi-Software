@@ -1,8 +1,9 @@
-package com.example.karmine.controller;
+package demo.controller;
 
-import com.example.karmine.model.Message;
-import com.example.karmine.model.MessageQueue;
-import com.example.karmine.service.MessageService;
+import demo.model.Message;
+import demo.model.MessageQueue;
+import demo.controller.MessageQueueRequest;
+import demo.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

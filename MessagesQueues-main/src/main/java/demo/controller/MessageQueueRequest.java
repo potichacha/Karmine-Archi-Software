@@ -1,4 +1,4 @@
-package com.example.karmine.controller;
+package demo.controller;
 
 public class MessageQueueRequest {
     private String content;

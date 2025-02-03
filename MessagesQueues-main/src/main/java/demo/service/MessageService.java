@@ -1,9 +1,9 @@
-package com.example.karmine.service;
+package demo.service;
 
-import com.example.karmine.model.Message;
-import com.example.karmine.model.MessageQueue;
-import com.example.karmine.data.MessageQueueData;
-import com.example.karmine.data.MessageData;
+import demo.model.Message;
+import demo.model.MessageQueue;
+import demo.data.MessageQueueData;
+import demo.data.MessageData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

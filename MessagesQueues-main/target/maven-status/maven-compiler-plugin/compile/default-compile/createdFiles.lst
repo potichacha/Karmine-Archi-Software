@@ -1,8 +1,8 @@
-com\example\karmine\controller\MessageQueueController.class
-com\example\karmine\data\MessageData.class
-com\example\karmine\service\MessageService.class
-com\example\karmine\model\Message.class
-com\example\karmine\controller\MessageQueueRequest.class
-com\example\karmine\data\MessageQueueData.class
-com\example\karmine\model\MessageQueue.class
+demo\controller\MessageQueueController.class
+demo\data\MessageData.class
+demo\data\MessageQueueData.class
+demo\controller\MessageQueueRequest.class
+demo\model\Message.class
 demo\DemoApp.class
+demo\model\MessageQueue.class
+demo\service\MessageService.class

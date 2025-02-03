@@ -1,7 +1,8 @@
-package com.example.karmine.data;
+package demo.data;
 
-import com.example.karmine.model.MessageQueue;
+import demo.model.MessageQueue;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MessageQueueData extends JpaRepository<MessageQueue, String> {}

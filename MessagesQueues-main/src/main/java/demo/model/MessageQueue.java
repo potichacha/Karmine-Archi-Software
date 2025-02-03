@@ -1,4 +1,4 @@
-package com.example.karmine.model;
+package demo.model;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
-package com.example.karmine.data;
+package demo.data;
 
-import com.example.karmine.model.Message;
+import demo.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
