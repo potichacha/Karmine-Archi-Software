@@ -4,8 +4,10 @@ import demo.model.Message;
 import demo.model.MessageQueue;
 import demo.data.MessageQueueData;
 import demo.data.MessageData;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,37 +21,64 @@ public class MessageService {
     @Autowired
     private MessageData messageData;
 
+    /**
+     * Récupère toutes les files d'attente.
+     */
     public List<MessageQueue> getAllQueues() {
         return queueData.findAll();
     }
 
+    /**
+     * Ajoute un message à une file d'attente.
+     * Si la file n'existe pas, elle est créée.
+     */
+    @Transactional
     public Message addMessageToQueue(String queueId, Message message) {
-        // Chercher ou créer la file d'attente
         MessageQueue queue = queueData.findById(queueId).orElseGet(() -> {
             MessageQueue newQueue = new MessageQueue(queueId);
-            queueData.save(newQueue);
-            return newQueue;
+            return queueData.save(newQueue);
         });
 
-        // Ajouter le message à la file
         message.setQueue(queue);
         queue.addMessage(message);
 
-        // Sauvegarder la file et le message
-        queueData.save(queue);
-        return message;
+        return messageData.save(message);
     }
 
+    /**
+     * Récupère le prochain message disponible dans une file, sans le supprimer.
+     */
     public Message getNextMessage(String queueId) {
-        // Trouver les messages disponibles dans la file
         List<Message> messages = messageData.findByQueueIdAndAvailableAtBefore(queueId, LocalDateTime.now());
-        if (messages.isEmpty()) {
-            return null; // Aucun message disponible
-        }
+        return messages.isEmpty() ? null : messages.get(0);
+    }
 
-        // Retourner le premier message disponible
-        Message nextMessage = messages.get(0);
-        messageData.delete(nextMessage); // Supprimer après traitement
-        return nextMessage;
+    public List<Message> searchMessages(String searchTerm) {
+        return messageData.findAll().stream()
+                .filter(m -> m.getContent().contains(searchTerm))
+                .collect(Collectors.toList());
+    }
+
+    public List<Message> getMessagesFrom(Long messageId) {
+        return messageData.findAll().stream()
+                .filter(m -> m.getId() >= messageId)
+                .collect(Collectors.toList());
+    }
+    public Message getMessageById(Long id) {
+        return messageData.findById(id).orElse(null);
+    }
+
+    /**
+     * Supprime un message uniquement s'il est lu et n'est plus dans aucun topic.
+     */
+    @Transactional
+    public boolean deleteMessage(Long messageId) {
+        return messageData.findById(messageId).map(message -> {
+            if (!message.isRead() || !message.getTopics().isEmpty()) {
+                throw new IllegalStateException("Le message doit être lu et ne doit appartenir à aucun topic pour être supprimé.");
+            }
+            messageData.delete(message);
+            return true;
+        }).orElse(false);
     }
 }

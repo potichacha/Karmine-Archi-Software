@@ -1,8 +1,13 @@
-demo\controller\MessageQueueController.class
+demo\controller\TopicController.class
+demo\model\Topic.class
 demo\data\MessageData.class
-demo\data\MessageQueueData.class
-demo\controller\MessageQueueRequest.class
 demo\model\Message.class
-demo\DemoApp.class
 demo\model\MessageQueue.class
+demo\data\TopicData.class
+demo\model\TopicMessage.class
+demo\controller\MessageQueueController.class
+demo\data\MessageQueueData.class
+demo\service\TopicService.class
+demo\controller\MessageQueueRequest.class
+demo\DemoApp.class
 demo\service\MessageService.class

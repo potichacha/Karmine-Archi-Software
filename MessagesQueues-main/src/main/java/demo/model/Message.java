@@ -1,9 +1,11 @@
 package demo.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -14,13 +16,15 @@ public class Message {
     private Long id;
 
     private String content;
-
     private LocalDateTime createdAt;
-
-    private LocalDateTime availableAt; // Quand ce message devient disponible
+    private LocalDateTime availableAt;
+    private boolean isRead = false;
 
     @ManyToOne
-    private MessageQueue queue; // Relation avec la file d’attente
+    private MessageQueue queue;
+
+    @ManyToMany(mappedBy = "messages", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private List<Topic> topics = new ArrayList<>();
 
     public Message() {}
 
@@ -55,12 +59,59 @@ public class Message {
         this.availableAt = availableAt;
     }
 
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
+
     public MessageQueue getQueue() {
         return queue;
     }
 
     public void setQueue(MessageQueue queue) {
         this.queue = queue;
+    }
+
+    public List<Topic> getTopics() {
+        return topics;
+    }
+
+    public void setTopics(List<Topic> topics) {
+        this.topics = topics;
+    }
+
+    public void addTopic(Topic topic) {
+        if (!this.topics.contains(topic)) {
+            this.topics.add(topic);
+            topic.getMessages().add(this);
+        }
+    }
+
+    public void removeTopic(Topic topic) {
+        if (this.topics.contains(topic)) {
+            this.topics.remove(topic);
+            topic.getMessages().remove(this);
+        }
+    }
+
+    @PreRemove
+    private void checkIfInTopic() {
+        if (topics != null && !topics.isEmpty()) {
+            throw new IllegalStateException("Cannot delete message still used in topics");
+        }
+    }
+
+    public void removeFromQueue() {
+        if (!isRead) {
+            throw new IllegalStateException("Message not read, cannot delete");
+        }
+        if (this.queue != null) {
+            this.queue.getMessages().remove(this);
+        }
+        this.queue = null;
     }
 
     @Override
@@ -70,6 +121,7 @@ public class Message {
                 ", content='" + content + '\'' +
                 ", createdAt=" + createdAt +
                 ", availableAt=" + availableAt +
+                ", isRead=" + isRead +
                 '}';
     }
 }
