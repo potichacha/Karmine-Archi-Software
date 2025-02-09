@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\DemoApp.java
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\data\MessageData.java
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\data\MessageQueueData.java
@@ -6,3 +7,18 @@ C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\m
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\controller\MessageQueueController.java
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\controller\MessageQueueRequest.java
 C:\Users\maxim\Desktop\UNIVM1S2\Karmine-Archi-Software\MessagesQueues-main\src\main\java\demo\service\MessageService.java
+=======
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\model\MessageQueue.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\service\MessageService.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\controller\TopicController.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\data\TopicData.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\model\Message.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\data\MessageQueueData.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\controller\MessageQueueRequest.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\data\MessageData.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\controller\MessageQueueController.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\model\Topic.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\service\TopicService.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\model\TopicMessage.java
+C:\Users\sacha\IdeaProjects\Karmine-Archi-Software2\MessagesQueues-main\src\main\java\demo\DemoApp.java
+>>>>>>> 0c88678a038f88fe03b0e2309ad1d4e501be6623
