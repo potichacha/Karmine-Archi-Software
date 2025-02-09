@@ -1,52 +1,77 @@
 package demo.model;
 
+import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Topic {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "topic_message",
-            joinColumns = @JoinColumn(name = "topic_id"),
-            inverseJoinColumns = @JoinColumn(name = "message_id")
-    )
-    private List<Message> messages;
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TopicMessage> topicMessages = new ArrayList<>();
 
-    // Getters & Setters
-    public Long getId() {
-        return id;
-    }
+    public Topic() {}
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public Topic(String name) {
         this.name = name;
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    // Getters & Setters
+    public Long getId() { return id; }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public List<TopicMessage> getTopicMessages() { return topicMessages; }
+
+    public void setTopicMessages(List<TopicMessage> topicMessages) {
+        this.topicMessages = topicMessages;
     }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
-
+    /**
+     * Ajoute un message à ce topic en créant une relation TopicMessage.
+     */
     public void addMessage(Message message) {
-        this.messages.add(message);
+        int messageNumber = topicMessages.size() + 1;
+        TopicMessage topicMessage = new TopicMessage(this, message, messageNumber);
+        topicMessages.add(topicMessage);
+        message.getTopicMessages().add(topicMessage); // Ajout aussi côté Message
     }
 
+    /**
+     * Supprime un message de ce topic en retirant la relation TopicMessage.
+     */
     public void removeMessage(Message message) {
-        this.messages.remove(message);
+        topicMessages.removeIf(tm -> tm.getMessage().equals(message));
+        message.getTopicMessages().removeIf(tm -> tm.getTopic().equals(this)); // Suppression aussi côté Message
+    }
+
+    /**
+     * Retourne la liste des messages associés à ce topic.
+     */
+    public List<Message> getMessages() {
+        return topicMessages.stream()
+                .map(TopicMessage::getMessage)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return "Topic{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", messages=" + topicMessages.size() +
+                '}';
     }
 }
