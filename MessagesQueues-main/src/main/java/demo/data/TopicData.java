@@ -1,17 +1,17 @@
 package demo.data;
 
 import demo.model.Topic;
-import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 @Repository
 public interface TopicData extends JpaRepository<Topic, Long> {
 
-    Topic findByName(String name);
+    Optional<Topic> findByName(String name);  // ✅ Retourne un Optional pour éviter les nulls
 
-    @Query("SELECT t FROM Topic t LEFT JOIN FETCH t.topicMessages tm WHERE t.id = :id ORDER BY tm.messageNumber ASC")
-    Topic findByIdWithMessagesSorted(@Param("id") Long id);
+    @Query("SELECT t FROM Topic t LEFT JOIN FETCH t.topicMessages WHERE t.id = :id")
+    Optional<Topic> findByIdWithMessagesSorted(@Param("id") Long id);
 }

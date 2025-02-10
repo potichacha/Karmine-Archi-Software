@@ -1,11 +1,11 @@
 package demo.model;
 
 import jakarta.persistence.*;
-import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -28,29 +28,30 @@ public class Topic {
 
     // Getters & Setters
     public Long getId() { return id; }
-
     public String getName() { return name; }
-
     public void setName(String name) { this.name = name; }
-
     public List<TopicMessage> getTopicMessages() { return topicMessages; }
+    public void setTopicMessages(List<TopicMessage> topicMessages) { this.topicMessages = topicMessages; }
 
-    public void setTopicMessages(List<TopicMessage> topicMessages) {
-        this.topicMessages = topicMessages;
-    }
-
+    /**
+     * Ajoute un message à un topic.
+     */
     public void addMessage(Message message) {
         int messageNumber = topicMessages.size() + 1;
         TopicMessage topicMessage = new TopicMessage(this, message, messageNumber);
         topicMessages.add(topicMessage);
-        message.getTopics().add(this);
     }
 
+    /**
+     * Supprime un message d'un topic.
+     */
     public void removeMessage(Message message) {
         topicMessages.removeIf(tm -> tm.getMessage().equals(message));
-        message.getTopics().remove(this);
     }
 
+    /**
+     * Récupère tous les messages associés à ce topic.
+     */
     public List<Message> getMessages() {
         return topicMessages.stream()
                 .map(TopicMessage::getMessage)

@@ -4,13 +4,13 @@ import demo.model.Message;
 import demo.model.MessageQueue;
 import demo.data.MessageQueueData;
 import demo.data.MessageData;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -26,6 +26,20 @@ public class MessageService {
      */
     public List<MessageQueue> getAllQueues() {
         return queueData.findAll();
+    }
+
+    /**
+     * Crée et sauvegarde un message sans l'ajouter à une file d'attente.
+     */
+    public Message saveMessage(Message message) {
+        return messageData.save(message);
+    }
+
+    /**
+     * Récupère tous les messages.
+     */
+    public List<Message> getAllMessages() {
+        return messageData.findAll();
     }
 
     /**
@@ -49,23 +63,29 @@ public class MessageService {
      * Récupère le prochain message disponible dans une file, sans le supprimer.
      */
     public Message getNextMessage(String queueId) {
-        List<Message> messages = messageData.findByQueueIdAndAvailableAtBefore(queueId, LocalDateTime.now());
-        return messages.isEmpty() ? null : messages.get(0);
+        return messageData.findByQueueIdAndAvailableAtBefore(queueId, LocalDateTime.now())
+                .stream().findFirst().orElse(null);
     }
 
+    /**
+     * Recherche des messages contenant un terme spécifique.
+     */
     public List<Message> searchMessages(String searchTerm) {
-        return messageData.findAll().stream()
-                .filter(m -> m.getContent().contains(searchTerm))
-                .collect(Collectors.toList());
+        return messageData.findByContentContainingIgnoreCase(searchTerm);
     }
 
+    /**
+     * Récupère les messages à partir d'un ID donné.
+     */
     public List<Message> getMessagesFrom(Long messageId) {
-        return messageData.findAll().stream()
-                .filter(m -> m.getId() >= messageId)
-                .collect(Collectors.toList());
+        return messageData.findByIdGreaterThan(messageId);
     }
-    public Message getMessageById(Long id) {
-        return messageData.findById(id).orElse(null);
+
+    /**
+     * Récupère un message par ID.
+     */
+    public Optional<Message> getMessageById(Long messageId) {
+        return messageData.findById(messageId);
     }
 
     /**
@@ -74,8 +94,8 @@ public class MessageService {
     @Transactional
     public boolean deleteMessage(Long messageId) {
         return messageData.findById(messageId).map(message -> {
-            if (!message.isRead() || !message.getTopics().isEmpty()) {
-                throw new IllegalStateException("Le message doit être lu et ne doit appartenir à aucun topic pour être supprimé.");
+            if (!message.isRead()) {
+                throw new IllegalStateException("❌ Le message doit être lu avant suppression.");
             }
             messageData.delete(message);
             return true;

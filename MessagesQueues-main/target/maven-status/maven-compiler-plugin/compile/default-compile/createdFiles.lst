@@ -10,4 +10,5 @@ demo\data\MessageQueueData.class
 demo\service\TopicService.class
 demo\controller\MessageQueueRequest.class
 demo\DemoApp.class
+demo\controller\MessageController.class
 demo\service\MessageService.class

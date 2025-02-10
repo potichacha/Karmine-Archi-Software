@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -23,9 +21,6 @@ public class Message {
     @ManyToOne
     private MessageQueue queue;
 
-    @ManyToMany(mappedBy = "messages", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private List<Topic> topics = new ArrayList<>();
-
     public Message() {}
 
     public Message(String content, long delayInSeconds) {
@@ -35,73 +30,20 @@ public class Message {
     }
 
     // Getters et setters
-    public Long getId() {
-        return id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getAvailableAt() {
-        return availableAt;
-    }
-
-    public void setAvailableAt(LocalDateTime availableAt) {
-        this.availableAt = availableAt;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void markAsRead() {
-        this.isRead = true;
-    }
-
-    public MessageQueue getQueue() {
-        return queue;
-    }
-
-    public void setQueue(MessageQueue queue) {
-        this.queue = queue;
-    }
-
-    public List<Topic> getTopics() {
-        return topics;
-    }
-
-    public void setTopics(List<Topic> topics) {
-        this.topics = topics;
-    }
-
-    public void addTopic(Topic topic) {
-        if (!this.topics.contains(topic)) {
-            this.topics.add(topic);
-            topic.getMessages().add(this);
-        }
-    }
-
-    public void removeTopic(Topic topic) {
-        if (this.topics.contains(topic)) {
-            this.topics.remove(topic);
-            topic.getMessages().remove(this);
-        }
-    }
+    public Long getId() { return id; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getAvailableAt() { return availableAt; }
+    public void setAvailableAt(LocalDateTime availableAt) { this.availableAt = availableAt; }
+    public boolean isRead() { return isRead; }
+    public void markAsRead() { this.isRead = true; }
+    public MessageQueue getQueue() { return queue; }
+    public void setQueue(MessageQueue queue) { this.queue = queue; }
 
     @PreRemove
     private void checkIfInTopic() {
-        if (topics != null && !topics.isEmpty()) {
-            throw new IllegalStateException("Cannot delete message still used in topics");
-        }
+        throw new IllegalStateException("Cannot delete a message still used in topics.");
     }
 
     public void removeFromQueue() {
