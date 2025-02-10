@@ -1,3 +1,4 @@
+demo\model\TopicMessageId.class
 demo\controller\TopicController.class
 demo\model\Topic.class
 demo\data\MessageData.class

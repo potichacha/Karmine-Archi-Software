@@ -3,9 +3,8 @@ package demo.model;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -17,8 +16,13 @@ public class Topic {
 
     private String name;
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TopicMessage> topicMessages = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "topic_message",
+            joinColumns = @JoinColumn(name = "topic_id"),
+            inverseJoinColumns = @JoinColumn(name = "message_id")
+    )
+    private Set<Message> messages = new HashSet<>();
 
     public Topic() {}
 
@@ -28,59 +32,25 @@ public class Topic {
 
     // Getters & Setters
     public Long getId() { return id; }
+
     public String getName() { return name; }
+
     public void setName(String name) { this.name = name; }
-    public List<TopicMessage> getTopicMessages() { return topicMessages; }
-    public void setTopicMessages(List<TopicMessage> topicMessages) { this.topicMessages = topicMessages; }
 
-<<<<<<< HEAD
-    /**
-     * Ajoute un message à un topic.
-=======
-    public void setTopicMessages(List<TopicMessage> topicMessages) {
-        this.topicMessages = topicMessages;
-    }
+    public Set<Message> getMessages() { return messages; }
 
-    /**
-     * Ajoute un message à ce topic en créant une relation TopicMessage.
->>>>>>> fc2721e1074411741384b4178b1b0abd91c3495b
-     */
+    public void setMessages(Set<Message> messages) { this.messages = messages; }
+
     public void addMessage(Message message) {
-        int messageNumber = topicMessages.size() + 1;
-        TopicMessage topicMessage = new TopicMessage(this, message, messageNumber);
-        topicMessages.add(topicMessage);
-<<<<<<< HEAD
+        if (!this.messages.contains(message)) {
+            this.messages.add(message);
+            message.getTopics().add(this);
+        }
     }
 
-    /**
-     * Supprime un message d'un topic.
-     */
     public void removeMessage(Message message) {
-        topicMessages.removeIf(tm -> tm.getMessage().equals(message));
-    }
-
-    /**
-     * Récupère tous les messages associés à ce topic.
-=======
-        message.getTopicMessages().add(topicMessage); // Ajout aussi côté Message
-    }
-
-    /**
-     * Supprime un message de ce topic en retirant la relation TopicMessage.
-     */
-    public void removeMessage(Message message) {
-        topicMessages.removeIf(tm -> tm.getMessage().equals(message));
-        message.getTopicMessages().removeIf(tm -> tm.getTopic().equals(this)); // Suppression aussi côté Message
-    }
-
-    /**
-     * Retourne la liste des messages associés à ce topic.
->>>>>>> fc2721e1074411741384b4178b1b0abd91c3495b
-     */
-    public List<Message> getMessages() {
-        return topicMessages.stream()
-                .map(TopicMessage::getMessage)
-                .collect(Collectors.toList());
+        this.messages.remove(message);
+        message.getTopics().remove(this);
     }
 
     @Override
@@ -88,7 +58,7 @@ public class Topic {
         return "Topic{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", messages=" + topicMessages.size() +
+                ", messages=" + messages.size() +
                 '}';
     }
 }
