@@ -33,13 +33,23 @@ public class Topic {
     public List<TopicMessage> getTopicMessages() { return topicMessages; }
     public void setTopicMessages(List<TopicMessage> topicMessages) { this.topicMessages = topicMessages; }
 
+<<<<<<< HEAD
     /**
      * Ajoute un message à un topic.
+=======
+    public void setTopicMessages(List<TopicMessage> topicMessages) {
+        this.topicMessages = topicMessages;
+    }
+
+    /**
+     * Ajoute un message à ce topic en créant une relation TopicMessage.
+>>>>>>> fc2721e1074411741384b4178b1b0abd91c3495b
      */
     public void addMessage(Message message) {
         int messageNumber = topicMessages.size() + 1;
         TopicMessage topicMessage = new TopicMessage(this, message, messageNumber);
         topicMessages.add(topicMessage);
+<<<<<<< HEAD
     }
 
     /**
@@ -51,6 +61,21 @@ public class Topic {
 
     /**
      * Récupère tous les messages associés à ce topic.
+=======
+        message.getTopicMessages().add(topicMessage); // Ajout aussi côté Message
+    }
+
+    /**
+     * Supprime un message de ce topic en retirant la relation TopicMessage.
+     */
+    public void removeMessage(Message message) {
+        topicMessages.removeIf(tm -> tm.getMessage().equals(message));
+        message.getTopicMessages().removeIf(tm -> tm.getTopic().equals(this)); // Suppression aussi côté Message
+    }
+
+    /**
+     * Retourne la liste des messages associés à ce topic.
+>>>>>>> fc2721e1074411741384b4178b1b0abd91c3495b
      */
     public List<Message> getMessages() {
         return topicMessages.stream()
