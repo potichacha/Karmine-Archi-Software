@@ -30,14 +30,11 @@ public class MessageService {
 
     public Optional<Message> getMessageById(Long id) {
         return messageRepository.findById(id);
-    }
-
-    // 🚀 Correction : Ajout de la méthode `readMessage`
+    }`
     public Message readMessage(Long id) {
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message non trouvé"));
 
-        // Mise à jour du premier accès
         if (message.getTimeFirstAccessed() == null) {
             message.setTimeFirstAccessed(LocalDateTime.now());
         }
@@ -47,7 +44,6 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    // 🚀 Correction : Ajout de la méthode `searchMessages`
     public List<Message> searchMessages(String content) {
         return messageRepository.findByContentContaining(content);
     }
@@ -65,8 +61,6 @@ public class MessageService {
             topic.getMessages().remove(message);
             topicRepository.save(topic);
         }
-
-        // ✅ Maintenant, on peut supprimer le message
         messageRepository.delete(message);
     }
 }
