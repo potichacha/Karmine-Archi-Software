@@ -1,50 +1,39 @@
-package demo.controller;
+package com.example.controller;
 
-import demo.model.Message;
-import demo.service.MessageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.model.Message;
+import com.example.service.MessageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/messages") // ✅ Route principale pour gérer les messages
+@RequestMapping("/messages")
 public class MessageController {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
 
-    // 🔹 Créer un message
-    @PostMapping
-    public ResponseEntity<Message> createMessage(@RequestParam String content) {
-        Message message = new Message(content, 0);
-        return ResponseEntity.ok(messageService.saveMessage(message));
+    public MessageController(MessageService messageService) {
+        this.messageService = messageService;
     }
 
-    // 🔹 Récupérer tous les messages
-    @GetMapping
-    public ResponseEntity<List<Message>> getAllMessages() {
-        return ResponseEntity.ok(messageService.getAllMessages());
-    }
-
-    // 🔹 Récupérer un message par ID
+    // Lecture d'un message (mise à jour des méta-données)
     @GetMapping("/{id}")
-    public ResponseEntity<Message> getMessageById(@PathVariable Long id) {
-        return messageService.getMessageById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Message> getMessage(@PathVariable Long id) {
+        Message message = messageService.readMessage(id);
+        return ResponseEntity.ok(message);
     }
 
-    // 🔹 Supprimer un message si lu et non lié à un topic
+    // Recherche de messages par contenu partiel
+    @GetMapping("/search")
+    public ResponseEntity<List<Message>> searchMessages(@RequestParam String content) {
+        List<Message> messages = messageService.searchMessages(content);
+        return ResponseEntity.ok(messages);
+    }
+
+    // Suppression d'un message (vérification faite dans le service)
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMessage(@PathVariable Long id) {
-        try {
-            boolean deleted = messageService.deleteMessage(id);
-            return deleted ? ResponseEntity.ok("✅ Message supprimé.") : ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
+        messageService.deleteMessage(id);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,103 +1,44 @@
-package demo.model;
+package com.example.model;
 
-import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime availableAt;
-    private boolean isRead = false;
+    private LocalDateTime timeCreated;
+    private LocalDateTime timeFirstAccessed;
+    private int numberOfReads;
 
-    @ManyToOne
-    private MessageQueue queue;
+    @ManyToMany(mappedBy = "messages")
+    @JsonIgnoreProperties("messages") // 🚀 Remplace @JsonBackReference
+    private List<Topic> topics = new ArrayList<>();
 
-    @ManyToMany
-    private Set<Topic> topics = new HashSet<>();
-
-    public Message() {}
-
-    public Message(String content, long delayInSeconds) {
-        this.content = content;
-        this.createdAt = LocalDateTime.now();
-        this.availableAt = this.createdAt.plusSeconds(delayInSeconds);
+    public Message() {
+        this.timeCreated = LocalDateTime.now();
+        this.numberOfReads = 0;
     }
 
-    // Getters & Setters
     public Long getId() { return id; }
-
     public String getContent() { return content; }
-
     public void setContent(String content) { this.content = content; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getTimeCreated() { return timeCreated; }
+    public void setTimeCreated(LocalDateTime timeCreated) { this.timeCreated = timeCreated; }
 
-    public LocalDateTime getAvailableAt() { return availableAt; }
+    public LocalDateTime getTimeFirstAccessed() { return timeFirstAccessed; }
+    public void setTimeFirstAccessed(LocalDateTime timeFirstAccessed) { this.timeFirstAccessed = timeFirstAccessed; }
 
-    public void setAvailableAt(LocalDateTime availableAt) { this.availableAt = availableAt; }
+    public int getNumberOfReads() { return numberOfReads; }
+    public void setNumberOfReads(int numberOfReads) { this.numberOfReads = numberOfReads; }
 
-    public boolean isRead() { return isRead; }
-
-    public void markAsRead() { this.isRead = true; }
-
-    public MessageQueue getQueue() { return queue; }
-
-    public void setQueue(MessageQueue queue) { this.queue = queue; }
-
-    public Set<Topic> getTopics() { return topics; }
-
-    public void setTopics(Set<Topic> topics) { this.topics = topics; }
-
-    public void addTopic(Topic topic) {
-        if (!this.topics.contains(topic)) {
-            this.topics.add(topic);
-            topic.getMessages().add(this);
-        }
-    }
-
-    public void removeTopic(Topic topic) {
-        if (this.topics.contains(topic)) {
-            this.topics.remove(topic);
-            topic.getMessages().remove(this);
-        }
-    }
-
-    @PreRemove
-    private void checkIfInTopic() {
-        if (!topics.isEmpty()) {
-            throw new IllegalStateException("Cannot delete message still used in topics.");
-        }
-    }
-
-    public void removeFromQueue() {
-        if (!isRead) {
-            throw new IllegalStateException("Message not read, cannot delete.");
-        }
-        if (this.queue != null) {
-            this.queue.getMessages().remove(this);
-        }
-        this.queue = null;
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "id=" + id +
-                ", content='" + content + '\'' +
-                ", createdAt=" + createdAt +
-                ", availableAt=" + availableAt +
-                ", isRead=" + isRead +
-                '}';
-    }
+    public List<Topic> getTopics() { return topics; }
+    public void setTopics(List<Topic> topics) { this.topics = topics; }
 }

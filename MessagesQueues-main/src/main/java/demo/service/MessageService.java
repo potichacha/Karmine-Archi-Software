@@ -1,104 +1,72 @@
-package demo.service;
+package com.example.service;
 
-import demo.model.Message;
-import demo.model.MessageQueue;
-import demo.data.MessageQueueData;
-import demo.data.MessageData;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.model.Message;
+import com.example.repository.MessageRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
+import com.example.model.Topic;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import com.example.repository.TopicRepository;
 
 @Service
 public class MessageService {
+    private final TopicRepository topicRepository;
+    private final MessageRepository messageRepository;
 
-    @Autowired
-    private MessageQueueData queueData;
-
-    @Autowired
-    private MessageData messageData;
-
-    /**
-     * Récupère toutes les files d'attente.
-     */
-    public List<MessageQueue> getAllQueues() {
-        return queueData.findAll();
+    public MessageService(MessageRepository messageRepository, TopicRepository topicRepository) {
+        this.messageRepository = messageRepository;
+        this.topicRepository = topicRepository;
     }
 
-    /**
-     * Crée et sauvegarde un message sans l'ajouter à une file d'attente.
-     */
-    public Message saveMessage(Message message) {
-        return messageData.save(message);
+    public Message createMessage(Message message) {
+        message.setTimeCreated(LocalDateTime.now());
+        return messageRepository.save(message);
     }
 
-    /**
-     * Récupère tous les messages.
-     */
     public List<Message> getAllMessages() {
-        return messageData.findAll();
+        return messageRepository.findAll();
     }
 
-    /**
-     * Ajoute un message à une file d'attente.
-     * Si la file n'existe pas, elle est créée.
-     */
-    @Transactional
-    public Message addMessageToQueue(String queueId, Message message) {
-        MessageQueue queue = queueData.findById(queueId).orElseGet(() -> {
-            MessageQueue newQueue = new MessageQueue(queueId);
-            return queueData.save(newQueue);
-        });
-
-        message.setQueue(queue);
-        queue.addMessage(message);
-
-        return messageData.save(message);
+    public Optional<Message> getMessageById(Long id) {
+        return messageRepository.findById(id);
     }
 
-    /**
-     * Récupère le prochain message disponible dans une file, sans le supprimer.
-     */
-    public Message getNextMessage(String queueId) {
-        return messageData.findByQueueIdAndAvailableAtBefore(queueId, LocalDateTime.now())
-                .stream().findFirst().orElse(null);
+    // 🚀 Correction : Ajout de la méthode `readMessage`
+    public Message readMessage(Long id) {
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Message non trouvé"));
+
+        // Mise à jour du premier accès
+        if (message.getTimeFirstAccessed() == null) {
+            message.setTimeFirstAccessed(LocalDateTime.now());
+        }
+
+        // Incrémentation du nombre de lectures
+        message.setNumberOfReads(message.getNumberOfReads() + 1);
+        return messageRepository.save(message);
     }
 
-    /**
-     * Recherche des messages contenant un terme spécifique.
-     */
-    public List<Message> searchMessages(String searchTerm) {
-        return messageData.findByContentContainingIgnoreCase(searchTerm);
+    // 🚀 Correction : Ajout de la méthode `searchMessages`
+    public List<Message> searchMessages(String content) {
+        return messageRepository.findByContentContaining(content);
     }
 
-    /**
-     * Récupère les messages à partir d'un ID donné.
-     */
-    public List<Message> getMessagesFrom(Long messageId) {
-        return messageData.findByIdGreaterThan(messageId);
-    }
+    public void deleteMessage(Long id) {
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("❌ Message non trouvé : " + id));
 
-    /**
-     * Récupère un message par ID.
-     */
-    public Optional<Message> getMessageById(Long messageId) {
-        return messageData.findById(messageId);
-    }
+        if (message.getNumberOfReads() == 0) {
+            throw new RuntimeException("❌ Impossible de supprimer un message non lu.");
+        }
 
-    /**
-     * Supprime un message uniquement s'il est lu et n'est plus dans aucun topic.
-     */
-    @Transactional
-    public boolean deleteMessage(Long messageId) {
-        return messageData.findById(messageId).map(message -> {
-            if (!message.isRead()) {
-                throw new IllegalStateException("❌ Le message doit être lu avant suppression.");
-            }
-            messageData.delete(message);
-            return true;
-        }).orElse(false);
+        // 🚀 Retirer le message de tous les topics avant suppression
+        for (Topic topic : message.getTopics()) {
+            topic.getMessages().remove(message);
+            topicRepository.save(topic);
+        }
+
+        // ✅ Maintenant, on peut supprimer le message
+        messageRepository.delete(message);
     }
 }
