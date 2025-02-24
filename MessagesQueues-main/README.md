@@ -496,7 +496,7 @@ Modifier
 Le Message a bien été supprimé car il avait été lu.
 
 4.3 Supprimer un Message d’un Topic
-💻 Commande :
+💻 Commande :-b   
 curl.exe -X DELETE http://localhost:8080/topics/1/messages/1
 📌 Pourquoi ?
 

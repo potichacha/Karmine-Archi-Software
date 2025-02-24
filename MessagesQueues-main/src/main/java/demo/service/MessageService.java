@@ -30,7 +30,7 @@ public class MessageService {
 
     public Optional<Message> getMessageById(Long id) {
         return messageRepository.findById(id);
-    }`
+    }
     public Message readMessage(Long id) {
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message non trouvé"));
