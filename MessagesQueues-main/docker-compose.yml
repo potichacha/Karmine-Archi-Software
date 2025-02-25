@@ -1,0 +1,24 @@
+services:
+  lb:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    networks:
+      - my-network
+    depends_on:
+      - service
+
+  service:
+    build:
+      context: .
+      dockerfile: src/main/java/demo/service/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

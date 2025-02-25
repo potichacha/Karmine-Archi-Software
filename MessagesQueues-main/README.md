@@ -1,10 +1,10 @@
-Documentation du Projet message-topic-app
-1. Introduction
-   1.1 Objectif du projet
+# Documentation du Projet message-topic-app
+## 1. Introduction
+   ### 1.1 Objectif du projet
    Le projet message-topic-app est une API REST développée avec Spring Boot.
    Son objectif est de permettre la gestion de Topics (sujets de discussion) et de Messages associés à ces Topics.
 
-1.2 Fonctionnalités principales
+### 1.2 Fonctionnalités principales
 Création, récupération et suppression de Topics (catégories de discussion).
 Ajout de Messages à un Topic.
 Affichage de la liste des Messages d’un Topic.
@@ -16,47 +16,49 @@ Tests de l’API via cURL et accès aux données via H2.
 Cette API fonctionne sans interface graphique et s’utilise à l’aide de requêtes HTTP (GET, POST, DELETE).
 Elle repose sur Spring Boot, Spring Data JPA, et une base de données H2 en mémoire.
 
-2. Architecture du Projet
-   2.1 Structure des fichiers
+## 2. Architecture du Projet
+   ### 2.1 Structure des fichiers
    Le projet suit une architecture classique en Spring Boot, avec plusieurs dossiers ayant chacun un rôle précis.
 
 pgsql
 Copier
 Modifier
-message-topic-app/
-├── pom.xml
-├── src/
-│    ├── main/
-│    │    ├── java/com/example/
-│    │    │    ├── Application.java
-│    │    │    ├── controller/
-│    │    │    │      ├── MessageController.java
-│    │    │    │      ├── TopicController.java
-│    │    │    ├── model/
-│    │    │    │      ├── Message.java
-│    │    │    │      ├── Topic.java
-│    │    │    ├── repository/
-│    │    │    │      ├── MessageRepository.java
-│    │    │    │      ├── TopicRepository.java
-│    │    │    ├── service/
-│    │    │    │      ├── MessageService.java
-│    │    │    │      ├── TopicService.java
-│    │    │    ├── exception/
-│    │    │    │      ├── GlobalExceptionHandler.java
-│    │    └── resources/
-│    │           ├── application.properties
-│    │           ├── log4j2.xml
-2.2 Explication des dossiers
+message-topic-app/ \
+├── pom.xml \
+├── src/ \
+│    ├── main/ \
+│    │    ├── java/com/example/ \
+│    │    │    ├── Application.java \
+│    │    │    ├── controller/ \
+│    │    │    │      ├── MessageController.java \
+│    │    │    │      ├── TopicController.java \
+│    │    │    ├── model/ \
+│    │    │    │      ├── Message.java \
+│    │    │    │      ├── Topic.java \
+│    │    │    ├── repository/ \
+│    │    │    │      ├── MessageRepository.java \
+│    │    │    │      ├── TopicRepository.java \
+│    │    │    ├── service/ \
+│    │    │    │      ├── MessageService.java \
+│    │    │    │      ├── TopicService.java \
+│    │    │    ├── exception/ \
+│    │    │    │      ├── GlobalExceptionHandler.java\
+│    │    └── resources/ \
+│    │           ├── application.properties \
+│    │           ├── log4j2.xml \
+
+### 2.2 Explication des dossiers
 controller/ : Gère les requêtes HTTP envoyées par l’utilisateur.
 service/ : Contient la logique métier et les traitements des données.
 model/ : Définit la structure des données et la gestion des entités en base de données.
 repository/ : Contient les interfaces permettant d’accéder à la base de données.
 exception/ : Gère les erreurs afin de renvoyer des messages explicites aux utilisateurs.
 resources/ : Contient les fichiers de configuration (application.properties, log4j2.xml).
-3. Explication détaillée des fichiers
+
+## 3. Explication détaillée des fichiers
    Chaque fichier a un rôle spécifique au sein du projet. Cette section détaille les fonctions contenues dans chaque fichier, leur objectif et leur fonctionnement.
 
-3.1 Application.java
+### 3.1 Application.java
 Emplacement
 com.example.Application
 
@@ -174,11 +176,11 @@ Sauvegarde le Topic mis à jour.
 Documentation du Projet message-topic-app – Partie 4 : Explication détaillée des fichiers restants
 Cette partie couvre les modèles de données (model/), les repositories (repository/), la gestion des exceptions (exception/), et les fichiers de configuration (resources/).
 
-4. Modèles de Données (model/)
+## 4. Modèles de Données (model/)
    Les fichiers du dossier model/ représentent les entités du projet, c'est-à-dire les objets stockés dans la base de données.
    Spring Boot utilise Spring Data JPA pour gérer ces entités de manière automatique.
 
-4.1 Topic.java
+### 4.1 Topic.java
 📌 Rôle
 Le fichier Topic.java définit la structure des Topics qui contiennent des Messages.
 
@@ -218,7 +220,8 @@ private String name; → Stocke le nom du Topic.
 📌 Lien avec les autres fichiers
 Utilisé dans TopicService.java pour créer et récupérer des Topics.
 Lié à Message.java pour gérer les Messages associés à un Topic.
-4.2 Message.java
+
+### 4.2 Message.java
 📌 Rôle
 Le fichier Message.java définit la structure des Messages qui sont liés à un ou plusieurs Topics.
 
@@ -263,10 +266,11 @@ private int numberOfReads; → Compteur de nombre de lectures.
 📌 Lien avec les autres fichiers
 Utilisé dans MessageService.java pour gérer la lecture et la suppression des Messages.
 Lié à Topic.java pour référencer les Topics contenant ce Message.
-5. Gestion de la Base de Données (repository/)
+
+## 5. Gestion de la Base de Données (repository/)
    Les fichiers du dossier repository/ permettent d'accéder aux données stockées en base via Spring Data JPA.
 
-5.1 TopicRepository.java
+### 5.1 TopicRepository.java
 📌 Rôle
 Interface permettant de gérer les Topics en base de données.
 
@@ -284,7 +288,7 @@ De récupérer, enregistrer et supprimer des Topics.
 De retrouver un Topic à partir de son id (type Long).
 📌 Lien avec les autres fichiers
 Utilisé dans TopicService.java pour ajouter et récupérer des Topics.
-5.2 MessageRepository.java
+### 5.2 MessageRepository.java
 📌 Rôle
 Interface permettant de gérer les Messages en base de données.
 
@@ -302,7 +306,8 @@ De récupérer, enregistrer et supprimer des Messages.
 De retrouver un Message à partir de son id (type Long).
 📌 Lien avec les autres fichiers
 Utilisé dans MessageService.java pour ajouter et récupérer des Messages.
-6. Gestion des Erreurs (exception/)
+
+## 6. Gestion des Erreurs (exception/)
    Le fichier GlobalExceptionHandler.java permet de gérer les erreurs et d’envoyer des messages clairs à l’utilisateur.
 
 📌 Contenu du fichier
@@ -322,10 +327,11 @@ public class GlobalExceptionHandler {
 @ExceptionHandler(RuntimeException.class) → Capture les erreurs de type RuntimeException.
 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 → Renvoie un message clair en HTTP 400 (Bad Request).
-7. Fichiers de Configuration (resources/)
+
+## 7. Fichiers de Configuration (resources/)
    Les fichiers de configuration permettent de gérer la base de données et les logs.
 
-7.1 application.properties
+### 7.1 application.properties
 Ce fichier configure la base de données H2.
 
 properties
@@ -535,3 +541,11 @@ La vérification du serveur
 La gestion des Topics et des Messages
 Les commandes de suppression
 L’accès aux données via la console H2
+
+## 8. Docker
+Nous avons créer un Dockfile pour créer un container. \
+On utilise la commande suivante commande : 
++ docker build -t my-app . => créer un conteneur
+
+On va ensuite sur Docker Desktop > image > my-app > run pour lancer le container.
+Nous avons également utilisé NGINX pour utiliser nos services via Docker, en créant un nginx.conf ainsi qu'un Dockerfile pour utiliser NGINX. 
