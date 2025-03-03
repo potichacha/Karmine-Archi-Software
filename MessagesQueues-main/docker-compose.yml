@@ -3,19 +3,58 @@ services:
     build:
       context: nginx
       dockerfile: Dockerfile
+    container_name: load-balancer
     ports:
       - "9090:9090"
     networks:
       - my-network
     depends_on:
-      - service
+      - db
+      - container1
+      - container2
+      - monitoring
 
-  service:
+  container1:
     build:
       context: .
       dockerfile: src/main/java/demo/service/Dockerfile
+    container_name: container1
     ports:
-      - "8080:8080"
+      - "8081:8080"
+    networks:
+      - my-network
+
+  container2:
+    build:
+      context: .
+      dockerfile: src/main/java/demo/service/Dockerfile
+    container_name: container2
+    ports:
+      - "8082:8080"
+    networks:
+      - my-network
+
+  monitoring:
+    build:
+      context: monitoring
+      dockerfile: Dockerfile
+    container_name: monitoring
+    ports:
+      - "2375:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - my-network
+  
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: dbase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: test
+    ports:
+      - "3306:3306"
     networks:
       - my-network
 
