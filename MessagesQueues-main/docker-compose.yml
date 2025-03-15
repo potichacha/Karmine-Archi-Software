@@ -21,11 +21,18 @@ services:
     container_name: container1
     ports:
       - "8081:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/dbase
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
     networks:
       - my-network
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
-      interval: 30s
+      interval: 90s
       timeout: 10s
       retries: 3
     restart: on-failure
@@ -37,11 +44,18 @@ services:
     container_name: container2
     ports:
       - "8082:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/dbase
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
     networks:
       - my-network
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
-      interval: 30s
+      interval: 90s
       timeout: 10s
       retries: 3
     restart: on-failure
@@ -66,22 +80,28 @@ services:
   
   db:
     image: mysql:8.0
+    container_name: dbase
     environment:
-      MYSQL_ROOT_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dbase
-      MYSQL_USER: user
-      MYSQL_PASSWORD: test
     ports:
       - "3306:3306"
     networks:
       - my-network
+    volumes:
+      - mysql-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
+      retries: 5
+      start_period: 5s
       timeout: 10s
-      retries: 3
     restart: on-failure
 
 networks:
   my-network:
-    driver: bridge
+    name: my-network
+    external: true
+
+volumes:
+  mysql-data:

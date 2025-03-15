@@ -3,6 +3,8 @@ package com.example.controller;
 import com.example.model.Message;
 import com.example.model.Topic;
 import com.example.service.TopicService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,7 @@ public class TopicController {
     private static final Logger logger = LoggerFactory.getLogger(TopicController.class);
     private final TopicService topicService;
 
+    @Autowired
     public TopicController(TopicService topicService) {
         this.topicService = topicService;
     }

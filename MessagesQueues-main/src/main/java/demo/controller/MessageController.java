@@ -2,6 +2,8 @@ package com.example.controller;
 
 import com.example.model.Message;
 import com.example.service.MessageService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -12,6 +14,7 @@ public class MessageController {
 
     private final MessageService messageService;
 
+    @Autowired
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
     }
