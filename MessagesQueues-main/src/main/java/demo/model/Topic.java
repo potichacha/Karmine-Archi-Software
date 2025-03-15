@@ -1,4 +1,4 @@
-package com.example.model;
+package demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;

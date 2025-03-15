@@ -1,7 +1,7 @@
-package com.example.controller;
+package demo.controller;
 
-import com.example.model.Message;
-import com.example.service.MessageService;
+import demo.model.Message;
+import demo.service.MessageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
