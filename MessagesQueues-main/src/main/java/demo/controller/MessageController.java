@@ -25,6 +25,12 @@ public class MessageController {
         return ResponseEntity.ok(message);
     }
 
+    // ✅ Nouvelle route pour récupérer tous les messages
+    @GetMapping
+    public ResponseEntity<List<Message>> getAllMessages() {
+        return ResponseEntity.ok(messageService.getAllMessages());
+    }
+
     // Recherche de messages par contenu partiel
     @GetMapping("/search")
     public ResponseEntity<List<Message>> searchMessages(@RequestParam String content) {
