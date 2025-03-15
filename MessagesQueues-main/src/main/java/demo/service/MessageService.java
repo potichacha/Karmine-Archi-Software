@@ -1,13 +1,13 @@
-package com.example.service;
+package demo.service;
 
-import com.example.model.Message;
-import com.example.repository.MessageRepository;
+import demo.model.Message;
+import demo.repository.MessageRepository;
 import org.springframework.stereotype.Service;
-import com.example.model.Topic;
+import demo.model.Topic;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import com.example.repository.TopicRepository;
+import demo.repository.TopicRepository;
 
 @Service
 public class MessageService {
