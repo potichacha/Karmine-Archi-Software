@@ -1,4 +1,6 @@
-FROM debian:latest
-RUN apt-get update && apt-get install -y socat
+FROM openjdk:11-jre-slim
+RUN apt-get update && apt-get install -y socat curl
+COPY target/message-topic-app-1.0-SNAPSHOT.jar /app/message-topic-app-1.0-SNAPSHOT.jar
 EXPOSE 2375
 CMD ["socat", "TCP-LISTEN:2375,reuseaddr,fork", "UNIX-CONNECT:/var/run/docker.sock"]
+ENTRYPOINT ["java", "-cp", "/app/message-topic-app-1.0-SNAPSHOT.jar:/app/message-topic-app-1.0-SNAPSHOT.jar!/BOOT-INF/classes:/app/message-topic-app-1.0-SNAPSHOT.jar!/BOOT-INF/lib/*", "demo.service.MonitoringApplication"]

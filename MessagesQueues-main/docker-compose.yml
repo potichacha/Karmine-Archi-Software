@@ -48,13 +48,14 @@ services:
 
   monitoring:
     build:
-      context: monitoring
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: monitoring/dockerfile
     container_name: monitoring
     ports:
       - "2375:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/var/log
     networks:
       - my-network
     healthcheck:
@@ -63,7 +64,7 @@ services:
       timeout: 10s
       retries: 3
     restart: on-failure
-  
+
   db:
     image: mysql:8.0
     environment:
