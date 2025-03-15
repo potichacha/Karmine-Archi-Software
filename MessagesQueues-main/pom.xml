@@ -86,7 +86,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.0</version>
                 <configuration>
-                    <mainClass>com.example.Application</mainClass> <!-- Replace with your actual main class -->
+                    <mainClass>demo.Application</mainClass> <!-- Replace with your actual main class -->
                 </configuration>
             </plugin>
         </plugins>
