@@ -579,4 +579,12 @@ On utilise la commande suivante commande :
 + docker build -t my-app . => créer un conteneur
 
 On va ensuite sur Docker Desktop > image > my-app > run pour lancer le container.
-Nous avons également utilisé NGINX pour utiliser nos services via Docker, en créant un nginx.conf ainsi qu'un Dockerfile pour utiliser NGINX. 
+Nous avons également utilisé NGINX pour utiliser nos services via Docker, en créant un nginx.conf ainsi qu'un Dockerfile pour utiliser NGINX.
+
+8.1 Gestion du monitoring
+Nous avons créer un dossier monitoring depuis la racine du projet.
+Nous avons créer dans ce dossier un dockerfile et un fichier "monitoring.sh".
+
+Le fichier "monitoring.sh" est donné en ENTRYPOINT du dockerfile.
+Ce fichier cherche les containers à checker et regarde si le container est healthy ou non. Si il est "UNHEALTHY" il est redémarré.
+Le script ne prends pas en compte les containers qui ne sont pas dans la liste de base.
