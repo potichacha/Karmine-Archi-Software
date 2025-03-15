@@ -16,36 +16,60 @@ Tests de l’API via cURL et accès aux données via H2.
 Cette API fonctionne sans interface graphique et s’utilise à l’aide de requêtes HTTP (GET, POST, DELETE).
 Elle repose sur Spring Boot, Spring Data JPA, et une base de données H2 en mémoire.
 
+### 1.3 Gestion de la Queue (Message FIFO)
+Le projet intègre un système de **queue (file d'attente)** pour chaque Topic. Cela permet :
+- De stocker temporairement les messages dans une queue associée à un topic.
+- De récupérer facilement le **dernier message ajouté** sans parcourir toute la liste.
+- D'assurer une gestion des messages en **mode FIFO (First In, First Out)**.
+
+🚀 **Endpoints liés à la queue :**
+| Méthode | Endpoint | Description |
+|---------|---------|-------------|
+| `GET` | `/topics/{topicId}/last-message` | Récupère le dernier message ajouté dans la queue d’un Topic |
+
 ## 2. Architecture du Projet
 ### 2.1 Structure des fichiers
 Le projet suit une architecture classique en Spring Boot, avec plusieurs dossiers ayant chacun un rôle précis.
 
-pgsql
-Copier
-Modifier
-message-topic-app/ \
-├── pom.xml \
-├── src/ \
-│    ├── main/ \
-│    │    ├── java/com/example/ \
-│    │    │    ├── Application.java \
-│    │    │    ├── controller/ \
-│    │    │    │      ├── MessageController.java \
-│    │    │    │      ├── TopicController.java \
-│    │    │    ├── model/ \
-│    │    │    │      ├── Message.java \
-│    │    │    │      ├── Topic.java \
-│    │    │    ├── repository/ \
-│    │    │    │      ├── MessageRepository.java \
-│    │    │    │      ├── TopicRepository.java \
-│    │    │    ├── service/ \
-│    │    │    │      ├── MessageService.java \
-│    │    │    │      ├── TopicService.java \
-│    │    │    ├── exception/ \
-│    │    │    │      ├── GlobalExceptionHandler.java\
-│    │    └── resources/ \
-│    │           ├── application.properties \
-│    │           ├── log4j2.xml \
+messageQueues-main/
+├── pom.xml
+├── Dockerfile                  # ✅ Fichier pour conteneuriser l’application Spring Boot
+├── README.md
+├── monitoring/                  # 📌 (Dossier contenant uniquement Dockerfile)
+│   ├── Dockerfile                # ✅ Image pour le monitoring
+├── nginx/                        # 📌 (Dossier contenant Dockerfile + nginx.conf)
+│   ├── Dockerfile                # ✅ Image NGINX pour reverse proxy
+│   ├── nginx.conf                 # ✅ Configuration du reverse proxy
+├── src/
+│   ├── main/
+│   │   ├── java/demo/
+│   │   │   ├── Application.java  # ✅ Point d’entrée Spring Boot
+│   │   │   ├── config/           # 📌 (Configuration Spring Boot)
+│   │   │   │   ├── WebConfig.java
+│   │   │   │   ├── SwaggerConfig.java
+│   │   │   ├── controller/       # 📌 (Endpoints REST)
+│   │   │   │   ├── MessageController.java
+│   │   │   │   ├── TopicController.java
+│   │   │   ├── exception/        # 📌 (Gestion des erreurs)
+│   │   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── model/            # 📌 (Entités JPA)
+│   │   │   │   ├── Message.java
+│   │   │   │   ├── Topic.java
+│   │   │   ├── queue/            # 📌 (Gestion des queues FIFO)
+│   │   │   │   ├── InMemoryQueue.java
+│   │   │   │   ├── QueueManager.java
+│   │   │   ├── repository/       # 📌 (Accès DB avec Spring Data JPA)
+│   │   │   │   ├── MessageRepository.java
+│   │   │   │   ├── TopicRepository.java
+│   │   │   ├── service/          # 📌 (Logique métier)
+│   │   │   │   ├── MessageService.java
+│   │   │   │   ├── TopicService.java
+│   │   │   │   ├── QueueService.java    # ✅ Service pour gérer la queue
+│   │   ├── resources/
+│   │   │   ├── application.properties  # ✅ Configuration de l’application
+│   │   │   ├── log4j2.xml              # ✅ Configuration des logs
+
+
 
 ### 2.2 Explication des dossiers
 controller/ : Gère les requêtes HTTP envoyées par l’utilisateur.
@@ -54,6 +78,7 @@ model/ : Définit la structure des données et la gestion des entités en base d
 repository/ : Contient les interfaces permettant d’accéder à la base de données.
 exception/ : Gère les erreurs afin de renvoyer des messages explicites aux utilisateurs.
 resources/ : Contient les fichiers de configuration (application.properties, log4j2.xml).
+queue/ : Contient la gestion des messages en mode file d’attente (QueueService).
 
 ## 3. Explication détaillée des fichiers
 Chaque fichier a un rôle spécifique au sein du projet. Cette section détaille les fonctions contenues dans chaque fichier, leur objectif et leur fonctionnement.
@@ -90,9 +115,6 @@ Rôle
 Gère la création, la récupération et l'ajout de Messages dans un Topic.
 
 Contenu du fichier
-java
-Copier
-Modifier
 @RestController
 @RequestMapping("/topics")
 public class TopicController {
@@ -134,9 +156,6 @@ Rôle
 Gérer la logique métier des Topics.
 
 Contenu du fichier
-java
-Copier
-Modifier
 @Service
 public class TopicService {
 private final TopicRepository topicRepository;
@@ -172,6 +191,17 @@ Sauvegarde le Message en base.
 Ajoute le Message au Topic.
 Sauvegarde le Topic mis à jour.
 
+### 3.3.2 QueueService.java
+📌 **Rôle**
+Ce service gère une file d’attente pour stocker les derniers messages de chaque Topic.
+
+📌 **Fonctionnalités principales**
+- Stocker le dernier message d’un Topic.
+- Récupérer rapidement le dernier message stocké.
+- Fonctionne comme une queue FIFO.
+
+📌 **Exemple d’utilisation**
+Message lastMessage = queueService.getLastMessage(topic);
 
 Documentation du Projet message-topic-app – Partie 4 : Explication détaillée des fichiers restants
 Cette partie couvre les modèles de données (model/), les repositories (repository/), la gestion des exceptions (exception/), et les fichiers de configuration (resources/).
@@ -185,9 +215,6 @@ Spring Boot utilise Spring Data JPA pour gérer ces entités de manière automat
 Le fichier Topic.java définit la structure des Topics qui contiennent des Messages.
 
 📌 Contenu du fichier
-java
-Copier
-Modifier
 @Entity
 public class Topic {
 @Id
@@ -293,9 +320,6 @@ Utilisé dans TopicService.java pour ajouter et récupérer des Topics.
 Interface permettant de gérer les Messages en base de données.
 
 📌 Contenu du fichier
-java
-Copier
-Modifier
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 }
@@ -306,6 +330,16 @@ De récupérer, enregistrer et supprimer des Messages.
 De retrouver un Message à partir de son id (type Long).
 📌 Lien avec les autres fichiers
 Utilisé dans MessageService.java pour ajouter et récupérer des Messages.
+
+### 5.3 Tester la File d’Attente des Messages
+
+**1️⃣ Ajouter un Message à un Topic**
+curl.exe -X POST http://localhost:8080/topics/1/messages -H "Content-Type: application/json" -d "{\"content\":\"Message dans la queue\"}"
+Résultat attendu :
+{"id":1,"name":"Mon Topic Test","messages":[{"id":2,"content":"Message dans la queue","numberOfReads":0}]}
+**🚀 2️⃣ Récupérer le Dernier Message Stocké**
+curl.exe -X GET http://localhost:8080/topics/1/last-message
+{"id":2,"content":"Message dans la queue","numberOfReads":0}
 
 ## 6. Gestion des Erreurs (exception/)
 Le fichier GlobalExceptionHandler.java permet de gérer les erreurs et d’envoyer des messages clairs à l’utilisateur.
@@ -387,9 +421,6 @@ Cette commande crée un nouveau Topic nommé "Mon Topic Test".
 -d "{\"name\":\"Mon Topic Test\"}" → Envoie un objet JSON avec la clé "name".
 📌 Résultat attendu :
 
-json
-Copier
-Modifier
 {"id":1,"name":"Mon Topic Test","messages":[]}
 Cela signifie que le Topic a bien été créé en base de données.
 
