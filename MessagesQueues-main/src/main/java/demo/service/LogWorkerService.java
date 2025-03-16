@@ -19,7 +19,7 @@ public class LogWorkerService {
         this.messageService = messageService;
     }
 
-    @Scheduled(fixedRate = 5000) // Envoi d'un log toutes les 5 secondes
+    @Scheduled(fixedRate = 60000) // Envoi d'un log toutes les 5 secondes
     public void performTask() {
         String logMessage = "Worker task performed at " + java.time.LocalDateTime.now();
         logger.info(logMessage);

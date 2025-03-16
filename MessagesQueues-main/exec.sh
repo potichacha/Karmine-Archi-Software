@@ -3,6 +3,7 @@
 if [ "$1" == "h2" ]; then
     echo "Profil H2 sélectionné."
     echo "spring.profiles.active=h2" > src/main/resources/application.properties
+    echo "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true" >> src/main/resources/application.properties
 
     mvn clean install
     mvn spring-boot:run
@@ -10,6 +11,7 @@ if [ "$1" == "h2" ]; then
 elif [ "$1" == "mysql" ]; then
     echo "Profil MySQL sélectionné."
     echo "spring.profiles.active=mysql" > src/main/resources/application.properties
+    echo "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true" >> src/main/resources/application.properties
 
     mvn clean install
     docker-compose up --build -d
