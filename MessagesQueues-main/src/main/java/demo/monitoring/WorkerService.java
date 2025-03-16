@@ -16,14 +16,13 @@ public class WorkerService {
         String alert = queueService.getNextAlert();
 
         if (alert != null) {
-            System.out.println("🔄 Worker traite l’alerte : " + alert);
+            System.out.println("[WORKER] 🔄 Traitement de l’alerte : " + alert);
             restartContainer();
         }
     }
 
     private void restartContainer() {
-        System.out.println("🚀 Redémarrage du container...");
-        // Simule un restart : en vrai, il faut exécuter une commande docker ici
+        System.out.println("[WORKER] 🚀 Redémarrage du container...");
+        // Simule un restart (commande docker en vrai)
     }
 }
-
