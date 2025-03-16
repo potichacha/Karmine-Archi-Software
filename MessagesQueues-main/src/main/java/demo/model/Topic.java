@@ -13,11 +13,11 @@ public class Topic {
     private Long id;
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(name = "topic_messages",
             joinColumns = @JoinColumn(name = "topic_id"),
             inverseJoinColumns = @JoinColumn(name = "message_id"))
-    @JsonIgnoreProperties("topics") // 🚀 Remplace @JsonManagedReference
+    @JsonIgnoreProperties("topics")
     private List<Message> messages = new ArrayList<>();
 
     public Topic() {}

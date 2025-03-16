@@ -4,13 +4,18 @@ import demo.model.Message;
 import demo.model.Topic;
 import demo.repository.MessageRepository;
 import demo.repository.TopicRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TopicService {
 
+    private static final Logger logger = LoggerFactory.getLogger(TopicService.class);
     private final TopicRepository topicRepository;
     private final MessageRepository messageRepository;
     private final QueueService queueService;
@@ -23,12 +28,24 @@ public class TopicService {
 
     // ✅ Création d'un Topic
     public Topic createTopic(Topic topic) {
+        logger.info("✅ Création d'un nouveau topic : {}", topic.getName());
         return topicRepository.save(topic);
     }
 
     // ✅ Récupérer tous les Topics
     public List<Topic> getAllTopics() {
-        return topicRepository.findAll();
+        List<Topic> topics = topicRepository.findAll();
+        logger.info("✅ {} topics récupérés depuis la base.", topics.size());
+        return topics;
+    }
+
+    // ✅ Récupérer un topic par son ID
+    public Optional<Topic> getTopicById(Long topicId) {
+        Optional<Topic> topic = topicRepository.findById(topicId);
+        if (topic.isEmpty()) {
+            logger.warn("❌ Topic {} non trouvé.", topicId);
+        }
+        return topic;
     }
 
     // ✅ Récupérer un topic via son nom
@@ -39,7 +56,7 @@ public class TopicService {
     // ✅ Ajouter un message à un Topic et mettre à jour la queue
     public Topic addMessageToTopic(Long topicId, Message message) {
         Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new RuntimeException("❌ Topic non trouvé : " + topicId));
+                .orElseThrow(() -> new IllegalArgumentException("❌ Topic non trouvé : " + topicId));
 
         message = messageRepository.save(message); // ✅ Sauvegarde le message
         topic.getMessages().add(message); // ✅ Ajoute le message au Topic
@@ -48,13 +65,15 @@ public class TopicService {
         // ✅ Mise à jour de la queue avec le dernier message
         queueService.updateQueue(topic, message);
 
+        logger.info("✅ Message ajouté au topic {}.", topicId);
         return topic;
     }
 
     // ✅ Récupérer les messages d'un Topic
     public List<Message> getMessagesFromTopic(Long topicId) {
         Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new RuntimeException("❌ Topic non trouvé : " + topicId));
+                .orElseThrow(() -> new IllegalArgumentException("❌ Topic non trouvé : " + topicId));
+        logger.info("✅ {} messages récupérés pour le topic {}.", topic.getMessages().size(), topicId);
         return topic.getMessages();
     }
 
@@ -70,6 +89,11 @@ public class TopicService {
             throw new RuntimeException("❌ Le message " + messageId + " n'est pas dans ce Topic.");
         }
 
+        // ✅ Vérification avant suppression
+        if (message.getNumberOfReads() == 0) {
+            throw new RuntimeException("❌ Impossible de supprimer un message non lu.");
+        }
+
         topic.getMessages().remove(message);
         topicRepository.save(topic);
 
@@ -79,7 +103,7 @@ public class TopicService {
             queueService.updateQueue(topic, null); // ✅ Supprime le message de la queue
         }
 
-        // ✅ Si le message n'est plus dans aucun Topic, on le supprime de la base
+        // ✅ Supprimer le message de la base seulement s'il n'est plus dans aucun topic
         if (message.getTopics().isEmpty()) {
             messageRepository.delete(message);
         }
@@ -90,8 +114,34 @@ public class TopicService {
     // ✅ Récupérer le dernier message d'un Topic
     public Message getLastMessageFromQueue(Long topicId) {
         Topic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new IllegalArgumentException("❌ Topic non trouvé : " + topicId));
+
+        Message lastMessage = queueService.getLastMessage(topic);
+        if (lastMessage == null) {
+            logger.info("✅ Aucun message dans la queue pour le topic {}.", topicId);
+        }
+        return lastMessage;
+    }
+
+    // ✅ Supprimer un Topic en gérant les contraintes
+    public void deleteTopic(Long topicId) {
+        Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new RuntimeException("❌ Topic non trouvé : " + topicId));
 
-        return queueService.getLastMessage(topic);
+        // ✅ Cloner la liste pour éviter la modification en direct lors de l'itération
+        List<Message> messagesToRemove = new ArrayList<>(topic.getMessages());
+
+        // ✅ Dissocier chaque message du topic
+        for (Message message : messagesToRemove) {
+            message.getTopics().remove(topic);
+            if (message.getTopics().isEmpty()) { // Si ce message n'est plus lié à aucun topic
+                messageRepository.delete(message); // Supprime le message
+            } else {
+                messageRepository.save(message); // Sauvegarde le message mis à jour
+            }
+        }
+
+        // ✅ Supprimer le topic après avoir dissocié les messages
+        topicRepository.delete(topic);
     }
 }

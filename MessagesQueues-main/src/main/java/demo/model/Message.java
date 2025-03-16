@@ -18,7 +18,7 @@ public class Message {
     private int numberOfReads;
 
     @ManyToMany(mappedBy = "messages")
-    @JsonIgnoreProperties("messages") // 🚀 Remplace @JsonBackReference
+    @JsonIgnoreProperties("messages") // ✅ Évite les boucles infinies dans la sérialisation JSON
     private List<Topic> topics = new ArrayList<>();
 
     public Message() {
