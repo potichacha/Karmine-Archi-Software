@@ -574,12 +574,36 @@ Les commandes de suppression
 L’accès aux données via la console H2
 
 ## 8. Docker
-Nous avons créer un Dockfile pour créer un container. \
-On utilise la commande suivante commande :
-+ docker build -t my-app . => créer un conteneur
+Nous utilisons un docker-compose.yml pour déployer notre application sur Docker.\
+Pour facilité notre execution, nous utilisons le script exec.sh qui avec le parametre "mysql" va créer et initialiser nos conteneurs. Nous en avons 5 : 
++ La base de donnée en mysql
++ un Monitoring
++ un Load Balancer
++ un conteneur 1, pouvant utiliser les services décrit plus haut
++ un conteneur 2
 
-On va ensuite sur Docker Desktop > image > my-app > run pour lancer le container.
-Nous avons également utilisé NGINX pour utiliser nos services via Docker, en créant un nginx.conf ainsi qu'un Dockerfile pour utiliser NGINX.
+Nous avons également utilisé NGINX pour utiliser nos services via Docker, en créant un nginx.conf ainsi qu'un Dockerfile pour utiliser NGINX pour notre Load Balancer.\
+Pour vérifier que la base de donnée est correctement initialisé, il suffit de lancer la commande suivante :
++ docker exec -it dbase mysql -u root -p
+
+Il faut rentrer un mot de passe, ici "root", si cela ne fonctionne pas, relancer la commande et appuyer sur entrer pour le mot de passe (mot de passe vide). Après cela faire la commande :
++ SHOW DATABASES;
++ USE dbase;
++ SHOW Tables;
+
+Pour tester les services il suffit ensuite de se connecter au terminal du conteneur 1 ou 2 via la commande suivante : 
++ docker exec -it <nom_du_conteneur> bash (docker ps pour voir les noms des conteneurs)
+puis de faire les commandes suivantes : 
++ curl -X POST http://localhost:8080/topics -H "Content-Type: application/json" -d "{\"name\":\"Mon Topic Test\"}" => ajouter message à un topic
++ curl -X GET http://localhost:8080/topics => liste des topics
++ curl -X POST http://localhost:8080/topics/1/messages -H "Content-Type: application/json" -d "{\"content\":\"Premier message\"}" => ajouter un message
++ curl -X GET http://localhost:8080/messages/1 => check les message
+
+Pour vérifier qu'un topic par exemple est bien stocké dans la base de donnée, il suffit une nouvelle fois de s'y connecter puis de rentrer les commandes suivantes :
++ USE dbase;
++ SELECT * FROM topic
+
+ce qui affichera tout les topics créés. On peut répéter l'opération pour tout les services et tout ce qui peut etre stocké dans la base de donnée (SHOW Tables pour voir ce qui peut etre stocké).
 
 8.1 Gestion du monitoring
 Nous avons créer un dossier monitoring depuis la racine du projet.

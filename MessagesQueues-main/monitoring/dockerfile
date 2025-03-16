@@ -1,4 +1,8 @@
-FROM debian:latest
-RUN apt-get update && apt-get install -y socat
+FROM openjdk:17-jdk-slim
+RUN apt-get update && apt-get install -y socat curl docker.io
+COPY target/message-topic-app-1.0-SNAPSHOT.jar /app/message-topic-app-1.0-SNAPSHOT.jar
+COPY monitoring/monitoring.sh /monitoring/monitoring.sh
+RUN chmod +x /monitoring/monitoring.sh
 EXPOSE 2375
 CMD ["socat", "TCP-LISTEN:2375,reuseaddr,fork", "UNIX-CONNECT:/var/run/docker.sock"]
+ENTRYPOINT ["/monitoring/monitoring.sh"]
