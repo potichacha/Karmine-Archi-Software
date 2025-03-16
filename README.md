@@ -593,10 +593,11 @@ Il faut rentrer un mot de passe, ici "root", si cela ne fonctionne pas, relancer
 
 Pour tester les services il suffit ensuite de se connecter au terminal du conteneur 1 ou 2 via la commande suivante : 
 + docker exec -it <nom_du_conteneur> bash (docker ps pour voir les noms des conteneurs)
+
 puis de faire les commandes suivantes : 
-+ curl -X POST http://localhost:8080/topics -H "Content-Type: application/json" -d "{\"name\":\"Mon Topic Test\"}" => ajouter message à un topic
++ curl -X POST http://localhost:8080/topics -H "Content-Type: application/json" -d "{\\"name\\":\\"Mon Topic Test\\"}" => ajouter message à un topic
 + curl -X GET http://localhost:8080/topics => liste des topics
-+ curl -X POST http://localhost:8080/topics/1/messages -H "Content-Type: application/json" -d "{\"content\":\"Premier message\"}" => ajouter un message
++ curl -X POST http://localhost:8080/topics/1/messages -H "Content-Type: application/json" -d "{\\"content\\":\\"Premier message\\"}" => ajouter un message
 + curl -X GET http://localhost:8080/messages/1 => check les message
 
 Pour vérifier qu'un topic par exemple est bien stocké dans la base de donnée, il suffit une nouvelle fois de s'y connecter puis de rentrer les commandes suivantes :
