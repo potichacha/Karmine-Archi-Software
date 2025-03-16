@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.example</groupId>
+    <groupId>demo</groupId>
     <artifactId>message-topic-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 

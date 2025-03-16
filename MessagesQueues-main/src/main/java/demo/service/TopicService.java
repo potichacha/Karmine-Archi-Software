@@ -31,6 +31,11 @@ public class TopicService {
         return topicRepository.findAll();
     }
 
+    // ✅ Récupérer un topic via son nom
+    public Topic findTopicByName(String name) {
+        return topicRepository.findByName(name).orElse(null);
+    }
+
     // ✅ Ajouter un message à un Topic et mettre à jour la queue
     public Topic addMessageToTopic(Long topicId, Message message) {
         Topic topic = topicRepository.findById(topicId)

@@ -30,6 +30,10 @@ public class TopicController {
     @PostConstruct
     public void init() {
         logger.info("✅ TopicController chargé par Spring Boot !");
+        if (topicService.findTopicByName("logs") == null) {
+            topicService.createTopic(new Topic("logs"));
+            logger.info("✅ Topic 'logs' crée !");
+        }
     }
 
     // ✅ Création d'un Topic
