@@ -1,10 +1,13 @@
 package demo.controller;
 
+import com.mysql.cj.log.Log;
 import demo.model.Message;
 import demo.model.Topic;
+import demo.service.LogWorkerService;
 import demo.service.TopicService;
 import demo.service.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,19 +24,26 @@ public class TopicController {
     private static final Logger logger = LoggerFactory.getLogger(TopicController.class);
     private final TopicService topicService;
     private final QueueService queueService;
+    private final LogWorkerService logWorkerService;
 
     @Autowired
-    public TopicController(TopicService topicService, QueueService queueService) {
+    public TopicController(TopicService topicService, QueueService queueService, LogWorkerService logWorkerService) {
         this.topicService = topicService;
         this.queueService = queueService;
+        this.logWorkerService = logWorkerService;
     }
 
     @PostConstruct
     public void init() {
         logger.info("✅ TopicController chargé par Spring Boot !");
-        if (topicService.findTopicByName("logs") == null) {
-            topicService.createTopic(new Topic("logs"));
-            logger.info("✅ Topic 'logs' créé !");
+        try {
+            if (topicService.findTopicByName("logs") == null) {
+                topicService.createTopic(new Topic("logs"));
+                logger.info("✅ Topic 'logs' créé !");
+            }
+        }
+        catch (DataIntegrityViolationException e) {
+            logger.warn("Topic 'logs' already exists. Ignoring creation.");
         }
     }
 
@@ -42,6 +52,7 @@ public class TopicController {
     public ResponseEntity<Topic> createTopic(@RequestBody Topic topic) {
         Topic createdTopic = topicService.createTopic(topic);
         logger.info("✅ Nouveau topic créé : {}", createdTopic.getName());
+        logWorkerService.sendLog("New topic created: " + topic, "newtopic");
         return ResponseEntity.ok(createdTopic);
     }
 
@@ -69,6 +80,7 @@ public class TopicController {
     public ResponseEntity<Topic> addMessageToTopic(@PathVariable Long topicId, @RequestBody Message message) {
         Topic updatedTopic = topicService.addMessageToTopic(topicId, message);
         logger.info("✅ Message ajouté au topic {}.", topicId);
+        logWorkerService.sendLog("Message added to topic " + topicId + ": " + message, "addmessage");
         return ResponseEntity.ok(updatedTopic);
     }
 
@@ -85,6 +97,7 @@ public class TopicController {
     public ResponseEntity<Topic> removeMessageFromTopic(@PathVariable Long topicId, @PathVariable Long messageId) {
         Topic updatedTopic = topicService.removeMessageFromTopic(topicId, messageId);
         logger.info("✅ Message {} supprimé du topic {}.", messageId, topicId);
+        logWorkerService.sendLog("Message " + messageId + " deleted from topic " + topicId, "deletemessage");
         return ResponseEntity.ok(updatedTopic);
     }
 
@@ -110,6 +123,7 @@ public class TopicController {
         if (topic.isPresent()) {
             topicService.deleteTopic(topicId);
             logger.info("✅ Topic {} supprimé.", topicId);
+            logWorkerService.sendLog("Topic deleted: " + topicId, "deletetopic");
             return ResponseEntity.noContent().build(); // 204 No Content
         } else {
             logger.warn("❌ Tentative de suppression échouée, topic {} non trouvé.", topicId);

@@ -19,18 +19,18 @@ public class LogWorkerService {
         this.messageService = messageService;
     }
 
-    @Scheduled(fixedRate = 60000) // Envoi d'un log toutes les 5 secondes
+    @Scheduled(fixedRate = 30000) // Envoi d'un log toutes les 30 secondes
     public void performTask() {
         String logMessage = "Worker task performed at " + java.time.LocalDateTime.now();
         logger.info(logMessage);
-        sendLog(logMessage);
+        sendLog(logMessage, "test");
     }
 
-    private void sendLog(String logMessage) {
+    public void sendLog(String logMessage, String type) {
         Topic logsTopic = topicService.findTopicByName("logs");
         if (logsTopic != null) {
             Message message = new Message();
-            message.setContent(logMessage);
+            message.setContent("{\"type\": \"" + type + "\" ,\"msg\": " + logMessage + "\"}");
             message = messageService.createMessage(message);
             topicService.addMessageToTopic(logsTopic.getId(), message);
         } else {
