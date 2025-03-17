@@ -1,6 +1,7 @@
 package demo.controller;
 
 import demo.model.Message;
+import demo.service.LogWorkerService;
 import demo.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +15,19 @@ import java.util.Optional;
 public class MessageController {
 
     private final MessageService messageService;
+    private final LogWorkerService logWorkerService;
 
     @Autowired
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, LogWorkerService logWorkerService) {
         this.messageService = messageService;
+        this.logWorkerService = logWorkerService;
     }
 
     // ✅ Endpoint pour créer un message (corrigé)
     @PostMapping
     public ResponseEntity<Message> createMessage(@RequestBody Message message) {
         Message savedMessage = messageService.createMessage(message);
+        logWorkerService.sendLog("New Message: " + message, "newmessage");
         return ResponseEntity.ok(savedMessage);
     }
 
@@ -31,6 +35,7 @@ public class MessageController {
     @GetMapping("/{id}")
     public ResponseEntity<Message> getMessage(@PathVariable Long id) {
         Message message = messageService.readMessage(id);
+        logWorkerService.sendLog("Read Message: " + message, "readmessage");
         return ResponseEntity.ok(message);
     }
 
@@ -52,6 +57,7 @@ public class MessageController {
     public ResponseEntity<?> deleteMessage(@PathVariable Long id) {
         try {
             messageService.deleteMessage(id);
+            logWorkerService.sendLog("Message deleted: " + id, "deletemessage");
             return ResponseEntity.ok("✅ Message supprimé avec succès !");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("❌ Erreur : " + e.getMessage());
