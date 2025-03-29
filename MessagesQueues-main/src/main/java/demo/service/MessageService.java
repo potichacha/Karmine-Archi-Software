@@ -13,10 +13,12 @@ import demo.repository.TopicRepository;
 public class MessageService {
     private final TopicRepository topicRepository;
     private final MessageRepository messageRepository;
+    private final EventPublisherService eventPublisherService;
 
-    public MessageService(MessageRepository messageRepository, TopicRepository topicRepository) {
+    public MessageService(MessageRepository messageRepository, TopicRepository topicRepository,EventPublisherService eventPublisherService) {
         this.messageRepository = messageRepository;
         this.topicRepository = topicRepository;
+        this.eventPublisherService = eventPublisherService;
     }
 
     // ✅ Création d'un message (avec gestion des Topics)
@@ -30,7 +32,7 @@ public class MessageService {
                 throw new RuntimeException("❌ Topic inexistant : " + topic.getId());
             }
         }
-
+        eventPublisherService.publishMessageCreatedEvent(messageRepository.save(message));
         return messageRepository.save(message);
     }
 
@@ -50,6 +52,7 @@ public class MessageService {
 
         // Incrémentation du nombre de lectures
         message.setNumberOfReads(message.getNumberOfReads() + 1);
+        eventPublisherService.publishMessageReadEvent(message.getId());
         return messageRepository.save(message);
     }
 
@@ -64,6 +67,7 @@ public class MessageService {
                 .orElseThrow(() -> new RuntimeException("❌ Message non trouvé : " + id));
 
         if (message.getNumberOfReads() == 0) {
+            eventPublisherService.publishMessageError("Impossible de supprimer un message non lu. Message ID: " + id);
             throw new RuntimeException("❌ Impossible de supprimer un message non lu.");
         }
 
@@ -73,6 +77,7 @@ public class MessageService {
             topicRepository.save(topic);
         }
 
+        eventPublisherService.publishMessageDeletedEvent(message.getId());
         messageRepository.delete(message);
     }
 }

@@ -19,16 +19,19 @@ public class TopicService {
     private final TopicRepository topicRepository;
     private final MessageRepository messageRepository;
     private final QueueService queueService;
+    private final EventPublisherService eventPublisherService;
 
-    public TopicService(TopicRepository topicRepository, MessageRepository messageRepository, QueueService queueService) {
+    public TopicService(TopicRepository topicRepository, MessageRepository messageRepository, QueueService queueService, EventPublisherService eventPublisherService) {
         this.topicRepository = topicRepository;
         this.messageRepository = messageRepository;
         this.queueService = queueService;
+        this.eventPublisherService = eventPublisherService;
     }
 
     // ✅ Création d'un Topic
     public Topic createTopic(Topic topic) {
-        logger.info("✅ Création d'un nouveau topic : {}", topic.getName());
+        eventPublisherService.publishTopicCreatedEvent(topic.getName(),topic.getId());
+        //logger.info("✅ Création d'un nouveau topic : {}", topic.getName());
         return topicRepository.save(topic);
     }
 
@@ -65,7 +68,8 @@ public class TopicService {
         // ✅ Mise à jour de la queue avec le dernier message
         queueService.updateQueue(topic, message);
 
-        logger.info("✅ Message ajouté au topic {}.", topicId);
+        //logger.info("✅ Message ajouté au topic {}.", topicId);
+        eventPublisherService.publishTopicAddMessage(topic.getName(), topicId);
         return topic;
     }
 
@@ -74,6 +78,7 @@ public class TopicService {
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new IllegalArgumentException("❌ Topic non trouvé : " + topicId));
         logger.info("✅ {} messages récupérés pour le topic {}.", topic.getMessages().size(), topicId);
+        eventPublisherService.publishedTopicGetMessagesFromTopic(topic.getName(), topicId);
         return topic.getMessages();
     }
 
@@ -86,11 +91,13 @@ public class TopicService {
                 .orElseThrow(() -> new RuntimeException("❌ Message non trouvé : " + messageId));
 
         if (!topic.getMessages().contains(message)) {
+            eventPublisherService.publishMessageError("Message ID: " + messageId +"n'est pas dans le Topic ID: " + topicId);
             throw new RuntimeException("❌ Le message " + messageId + " n'est pas dans ce Topic.");
         }
 
         // ✅ Vérification avant suppression
         if (message.getNumberOfReads() == 0) {
+            eventPublisherService.publishMessageError("Impossible de supprimer un message non lu. Message ID: " + messageId);
             throw new RuntimeException("❌ Impossible de supprimer un message non lu.");
         }
 
@@ -142,6 +149,7 @@ public class TopicService {
         }
 
         // ✅ Supprimer le topic après avoir dissocié les messages
+        eventPublisherService.publishTopicDeletedEvent(topic.getName(), topicId);
         topicRepository.delete(topic);
     }
 }
