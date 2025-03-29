@@ -14,7 +14,7 @@ elif [ "$1" == "mysql" ]; then
     echo "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true" >> src/main/resources/application.properties
 
     mvn clean install
-    docker-compose up --build -d
+      docker-compose up --build -d
 else
     echo "Erreur : Veuillez fournir un profil valide h2 ou mysql."
     exit 1
