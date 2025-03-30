@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class LogWorkerService {
 
@@ -19,7 +21,7 @@ public class LogWorkerService {
         this.messageService = messageService;
     }
 
-    @Scheduled(fixedRate = 30000) // Envoi d'un log toutes les 30 secondes
+    @Scheduled(fixedRate = 60000) // Envoi d'un log toutes les 60 secondes
     public void performTask() {
         String logMessage = "Worker task performed at " + java.time.LocalDateTime.now();
         logger.info(logMessage);
@@ -29,9 +31,12 @@ public class LogWorkerService {
     public void sendLog(String logMessage, String type) {
         Topic logsTopic = topicService.findTopicByName("logs");
         if (logsTopic != null) {
-            Message message = new Message();
-            message.setContent("{\"type\": \"" + type + "\" ,\"msg\": " + logMessage + "\"}");
-            message = messageService.createMessage(message);
+            Message message_template = new Message();
+            ArrayList<Topic> topics = new ArrayList<>();
+            topics.add(logsTopic);
+            message_template.setTopics(topics);
+            message_template.setContent("{\"type\": \"" + type + "\" ,\"msg\": " + logMessage + "\"}");
+            Message message = messageService.createMessage(message_template);
             topicService.addMessageToTopic(logsTopic.getId(), message);
         } else {
             logger.error("❌ Topic 'logs' non trouvé.");
